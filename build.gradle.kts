@@ -19,6 +19,11 @@ repositories {
 }
 
 dependencies {
+
+    //KTU related
+    implementation("org.json:json:20220320")
+    implementation("org.simpleframework",  "simple-xml", "2.7.1")
+
     implementation("io.javalin:javalin-bundle:4.3.0")
     implementation("com.github.kmehrunes:javalin-jwt:0.3")
     implementation("com.beust:klaxon:5.5")

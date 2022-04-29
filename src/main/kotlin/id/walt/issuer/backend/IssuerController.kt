@@ -162,7 +162,8 @@ object IssuerController {
     }
     val sessionId = ctx.queryParam("sessionId")
     if(sessionId == null)
-      ctx.json(IssuerManager.listIssuableCredentialsFor(userInfo!!.id))
+      //ctx.json(IssuerManager.listIssuableCredentialsFor(userInfo!!.id))
+      ctx.json(IssuerManager.listIssuableCredentialsFor(userInfo))
     else
       ctx.json(IssuerManager.getIssuanceSession(sessionId)?.issuables ?: Issuables(credentials = listOf()))
   }
@@ -240,13 +241,18 @@ object IssuerController {
   }
 
   fun par(ctx: Context) {
+    val userInfo = JWTService.getUserInfo(ctx)
+    if(userInfo == null) {
+      ctx.status(HttpCode.UNAUTHORIZED)
+      return
+    }
     val req = AuthorizationRequest.parse(ServletUtils.createHTTPRequest(ctx.req))
     val claims = OIDCUtils.getVCClaims(req)
     if(claims == null || claims.credentials == null) {
       ctx.status(HttpCode.BAD_REQUEST).json(PushedAuthorizationErrorResponse(ErrorObject("400", "No credential claims given", 400)))
       return
     }
-    val session = IssuerManager.initializeIssuanceSession(claims.credentials!!, req)
+    val session = IssuerManager.initializeIssuanceSession(claims.credentials!!, req, userInfo)
     ctx.status(HttpCode.CREATED).json(PushedAuthorizationSuccessResponse(URI("urn:ietf:params:oauth:request_uri:${session.id}"), IssuerManager.EXPIRATION_TIME.seconds).toJSONObject())
   }
 

@@ -22,6 +22,7 @@ import id.walt.signatory.Signatory
 import id.walt.signatory.dataproviders.MergingDataProvider
 import id.walt.vclib.credentials.VerifiablePresentation
 import id.walt.WALTID_DATA_ROOT
+import id.walt.webwallet.backend.auth.UserInfo
 import id.walt.webwallet.backend.context.UserContext
 import id.walt.webwallet.backend.context.WalletContextManager
 import java.net.URI
@@ -54,12 +55,23 @@ object IssuerManager {
     }
   }
 
+  /*
+  //Original walt.id function
   fun listIssuableCredentialsFor(user: String): Issuables {
     return Issuables(
       credentials = listOf("VerifiableId", "VerifiableDiploma", "VerifiableVaccinationCertificate", "ProofOfResidence", "ParticipantCredential", "Europass")
         .map { IssuableCredential.fromTemplateId(it) }
     )
   }
+*/
+  fun listIssuableCredentialsFor(user: UserInfo): Issuables {
+    val cred = listOf("VerifiableId","VerifiableDiploma")
+      .map { IssuableCredential.fromTemplateId(it,user) }
+    println("cred:")
+    println(cred)
+    return Issuables(cred)
+  }
+
 
   fun newSIOPIssuanceRequest(user: String, selectedIssuables: Issuables): SIOPv2Request {
     val nonce = UUID.randomUUID().toString()
@@ -149,6 +161,8 @@ object IssuerManager {
     return nonceCache.getIfPresent(nonce) ?: false
   }
 
+  /*
+  //Original walt.id function
   fun initializeIssuanceSession(credentialClaims: List<CredentialClaim>, authRequest: AuthorizationRequest): IssuanceSession {
     val id = UUID.randomUUID().toString()
     //TODO: validata/verify PAR request, VP tokens, claims, etc
@@ -156,6 +170,15 @@ object IssuerManager {
     sessionCache.put(id, session)
     return session
   }
+*/
+  fun initializeIssuanceSession(credentialClaims: List<CredentialClaim>, authRequest: AuthorizationRequest, user: UserInfo): IssuanceSession {
+    val id = UUID.randomUUID().toString()
+    //TODO: validata/verify PAR request, VP tokens, claims, etc
+    val session = IssuanceSession(id, credentialClaims, authRequest, UUID.randomUUID().toString(), Issuables.fromCredentialClaims(credentialClaims,user))
+    sessionCache.put(id, session)
+    return session
+  }
+
 
   fun getIssuanceSession(id: String): IssuanceSession? {
     return sessionCache.getIfPresent(id)
