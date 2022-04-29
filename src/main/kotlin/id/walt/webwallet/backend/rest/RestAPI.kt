@@ -4,6 +4,7 @@ import cc.vileda.openapi.dsl.components
 import cc.vileda.openapi.dsl.info
 import cc.vileda.openapi.dsl.security
 import com.beust.klaxon.Klaxon
+import edu.ktu.helpers.ais.backend.AisController
 import id.walt.issuer.backend.IssuerController
 import id.walt.onboarding.backend.OnboardingController
 import id.walt.verifier.backend.VerifierController
@@ -37,6 +38,9 @@ object RestAPI {
       AuthController.routes
       WalletController.routes
       DidWebRegistryController.routes
+    }
+    ApiBuilder.path("ktu-ais-api") {
+      AisController.routes
     }
     ApiBuilder.path("verifier-api") {
       VerifierController.routes
