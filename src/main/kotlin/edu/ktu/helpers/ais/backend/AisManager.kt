@@ -1,5 +1,7 @@
 package edu.ktu.helpers.ais.backend
 
+import id.walt.webwallet.backend.auth.UserData
+
 object AisManager {
 
     fun getKtuModulesList(): Collection<KtuModule>{
@@ -16,8 +18,12 @@ object AisManager {
 
     fun createNewUser(userId : String, userPassword : String): String {
 
-        //TODO: Creation of user in the Login file is needed
-        return "User created"
+        return try {
+            AisUserManager.addUserData( UserData(userId, userPassword, "") )
+            "User created"
+        } catch (e: Exception) {
+            "Can't create user. Error: " + e.message
+        }
     }
 
 }
