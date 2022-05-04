@@ -1,5 +1,6 @@
 package id.walt.issuer.backend
 
+import com.nimbusds.oauth2.sdk.id.Identifier
 import id.walt.model.oidc.CredentialClaim
 import id.walt.vclib.model.AbstractVerifiableCredential
 import id.walt.vclib.model.CredentialSubject
@@ -7,6 +8,7 @@ import id.walt.vclib.registry.VcTypeRegistry
 import id.walt.vclib.templates.VcTemplateManager
 import id.walt.webwallet.backend.auth.UserInfo
 import edu.ktu.helpers.StudentCredentialsGenerator
+import id.walt.vclib.credentials.Europass
 import id.walt.vclib.credentials.VerifiableDiploma
 import id.walt.vclib.credentials.VerifiableId
 
@@ -62,7 +64,17 @@ data class IssuableCredential (
         println("credential subject po pakeitimo :")
         println(crd.credentialSubject)
       }
+      else if (templateId == " Europass"){
+        crd = crd as Europass
+        println("europass subject:")
+        println("credential subject:")
+        println(crd.credentialSubject)
+        crd.credentialSubject
+        crd.credentialSubject = generateDiplomaEuropass(crd,user)
 
+        println("credential subject po pakeitimo :")
+        println(crd.credentialSubject)
+      }
       return IssuableCredential(
         crd!!.credentialSchema!!.id,
         crd.type.last(),
@@ -88,7 +100,55 @@ data class IssuableCredential (
       return changedCred
 
     }
+    fun generateDiplomaEuropass(cred: Europass, user : UserInfo) : Europass.EuropassSubject?{
+      val jsonDiploma = StudentCredentialsGenerator.getStudentDiplomaXml(user)
+      val diplomas = jsonDiploma?.getJSONObject("duomenys")?.getJSONObject("pazymejimas")
 
+      var changedCred = cred.credentialSubject
+
+
+      changedCred?.dateOfBirth = jsonDiploma?.getJSONObject("duomenys")?.getJSONObject("pazymejimas")?.getJSONObject("asmuo")?.getString("gimimoData")
+      changedCred?.familyName = diplomas?.getJSONObject("asmuo")?.getString("pavarde")
+      changedCred?.givenNames = diplomas?.getJSONObject("asmuo")?.getString("vardas")
+      changedCred?.identifier =  Europass.EuropassSubject.Identifier(
+        diplomas?.getJSONObject("isdavusiInstitucija")!!.getString("institucijosPavadinimas"),
+                diplomas?.getJSONObject("isdavusiInstitucija")!!.getString("institucijosPavadinimas")
+      )
+      var learningAchievement = Europass.EuropassSubject.LearningAchievement(
+        diplomas?.getJSONObject("priedas").getString("numeris").toString(),
+        diplomas?.getJSONObject("priedas").getString("tipas"),
+        diplomas?.getJSONObject("priedas").getString("studijuProgramosReikalavimai"),
+        listOf(
+          diplomas?.getJSONObject("priedas").getString("kvalifikacijosGalimybes"),
+          diplomas?.getJSONObject("priedas").getString("studijuProgramosReikalavimai")
+        )
+
+      )
+      changedCred?.learningAchievement = learningAchievement
+
+      var awardingOpportunity =  Europass.EuropassSubject.AwardingOpportunity(
+        diplomas?.getInt("blankoKodas").toString(),
+        diplomas!!.getString("programosPavadinimas"),
+        Europass.EuropassSubject.AwardingOpportunity.AwardingBody(
+          id = diplomas?.getJSONObject("isdavusiInstitucija").getInt("institucijosKodas").toString(),
+          eidasLegalIdentifier = "",
+          registration = diplomas?.getJSONObject("isdavusiInstitucija").getString("institucijosPavadinimas"),
+          preferredName = diplomas?.getJSONObject("isdavusiInstitucija").getString("institucijosVadovas")
+        )
+      )
+      changedCred?.awardingOpportunity = awardingOpportunity
+
+      val grades = diplomas?.getJSONArray("dalykas")!!.toString()
+      changedCred?.learningSpecification =  Europass.EuropassSubject.LearningSpecification(
+        "gg",
+        listOf(grades),
+        5,
+        2,
+        listOf("berebe")
+      )
+      return changedCred
+
+    }
     fun generateDiploma(cred: VerifiableDiploma, user : UserInfo): VerifiableDiploma.VerifiableDiplomaSubject? {
 
       println("userInfo")
@@ -104,11 +164,11 @@ data class IssuableCredential (
       changedCred?.familyName = diplomas?.getJSONObject("asmuo")?.getString("pavarde")
       changedCred?.givenNames = diplomas?.getJSONObject("asmuo")?.getString("vardas")
       changedCred?.identifier = diplomas?.getJSONObject("isdavusiInstitucija")?.getString("institucijosPavadinimas")
-
+      val grades = diplomas?.getJSONArray("dalykas")!!.toString()
       var gradingScheme = VerifiableDiploma.VerifiableDiplomaSubject.GradingScheme(
         id = diplomas?.getJSONArray("dalykas")?.getJSONObject(0)!!.getInt("kodas").toString(),
         title = diplomas?.getJSONArray("dalykas")?.getJSONObject(0)!!.getString("pavadinimas"),
-        description = diplomas?.getJSONArray("dalykas")?.getJSONObject(0)!!.getString("ivertinimas")
+        description = grades
       )
       changedCred?.gradingScheme = gradingScheme
 

@@ -63,6 +63,7 @@ object WalletController {
                     documented(CustodianController.listCredentialIdsDocs(), CustodianController::listCredentials),
                     UserRole.AUTHORIZED
                 )
+
                 delete(
                     "delete/{alias}",
                     documented(CustodianController.deleteCredentialDocs(), CustodianController::deleteCredential),

@@ -35,6 +35,7 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import mu.KotlinLogging
+import java.nio.file.Paths
 
 val WALTID_WALLET_BACKEND_PORT = System.getenv("WALTID_WALLET_BACKEND_PORT")?.toIntOrNull() ?: 8080
 
@@ -44,6 +45,8 @@ val WALTID_DATA_ROOT = System.getenv("WALTID_DATA_ROOT") ?: "."
 
 
 fun main(args: Array<String>) {
+    val path = Paths.get("").toAbsolutePath().toString()
+    println(path)
     ServiceMatrix("service-matrix.properties")
     ServiceRegistry.registerService<ContextManager>(WalletContextManager)
 

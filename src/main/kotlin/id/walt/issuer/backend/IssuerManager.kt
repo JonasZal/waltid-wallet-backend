@@ -65,7 +65,7 @@ object IssuerManager {
   }
 */
   fun listIssuableCredentialsFor(user: UserInfo): Issuables {
-    val cred = listOf("VerifiableId","VerifiableDiploma")
+    val cred = listOf("VerifiableId","VerifiableDiploma","Europass")
       .map { IssuableCredential.fromTemplateId(it,user) }
     println("cred:")
     println(cred)

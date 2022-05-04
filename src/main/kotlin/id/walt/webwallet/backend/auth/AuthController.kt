@@ -8,6 +8,12 @@ import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.http.Context
 import io.javalin.plugin.openapi.dsl.document
 import io.javalin.plugin.openapi.dsl.documented
+import okhttp3.internal.toImmutableList
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileReader
+import java.io.IOException
+import java.nio.file.Paths
 
 object AuthController {
     val routes
@@ -36,18 +42,83 @@ object AuthController {
 
     fun login(ctx: Context) {
         val userInfo = ctx.bodyAsClass(UserInfo::class.java)
+        val path = Paths.get("").toAbsolutePath().toString() + "/data/Logins/logins.txt"
+        var userDataList = readUserData(path)
         // TODO: verify login credentials!!
-        ContextManager.runWith(WalletContextManager.getUserContext(userInfo)) {
-            if(DidService.listDids().isEmpty()) {
-                DidService.create(DidMethod.key)
+        var authentificated = false
+        for(user in userDataList){
+            if(user.email == userInfo.email && user.password == userInfo.password){
+//                userInfo.diplomaFile = user.diplomaName
+                authentificated = true
+                println("duomenys prisijungimo geri")
+                ContextManager.runWith(WalletContextManager.getUserContext(userInfo)) {
+                    if(DidService.listDids().isEmpty()) {
+                        DidService.create(DidMethod.key)
+                    }
+                }
+
+                ctx.json(UserInfo(userInfo.id).apply {
+                    token = JWTService.toJWT(userInfo)
+
+                }   )
+
+
+                //var jsonString = "{${UserInfo(userInfo.id).apply { token = JWTService.toJWT(userInfo) } }, diplomaFile: ${user.diplomaName}}"
+//                var jsonString = "{ token : \"${JWTService.toJWT(userInfo)}\", diplomaFile: \"${user.diplomaName}\" }"
+//
+//                var jsonObject = JSONObject(jsonString)
+//                println(jsonString)
+//                ctx.json(jsonObject)
+                return
+
             }
         }
-        ctx.json(UserInfo(userInfo.id).apply {
-            token = JWTService.toJWT(userInfo)
-        })
+//        ContextManager.runWith(WalletContextManager.getUserContext(userInfo)) {
+//            if(DidService.listDids().isEmpty()) {
+//                DidService.create(DidMethod.key)
+//            }
+//        }
+//        ctx.json(UserInfo(userInfo.id).apply {
+//            token = JWTService.toJWT(userInfo)
+//        })
+        ctx.status(401).result("Unauthorized")
     }
+    fun readUserData(path : String) : List<UserData>{
 
+        var userDataList = mutableListOf<UserData>()
+
+        val xmlIdData = File(path).readText(charset = Charsets.UTF_8)
+
+        val file = File(path)
+        try {
+            BufferedReader(FileReader(file)).use { br ->
+                var line: String?
+                while (br.readLine().also { line = it } != null) {
+                    println(line)
+                    var lines = line!!.split(" ")
+                    println("lines:")
+                    println(lines)
+                    var user = UserData(lines[0],lines[1],lines[2])
+                    println("user:")
+                    println(user)
+                    userDataList.add(user)
+
+                }
+                println("userDataList")
+                println(userDataList)
+
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return userDataList.toImmutableList()
+    }
     fun userInfo(ctx: Context) {
+        println("ctx: ")
+        println(ctx.body())
+        println("ctx json: ")
+        println(ctx.body())
         ctx.json(JWTService.getUserInfo(ctx)!!)
     }
 }
