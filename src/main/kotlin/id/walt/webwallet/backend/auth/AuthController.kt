@@ -1,5 +1,6 @@
 package id.walt.webwallet.backend.auth
 
+import edu.ktu.helpers.ais.backend.AisUserManager
 import id.walt.model.DidMethod
 import id.walt.services.context.ContextManager
 import id.walt.services.did.DidService
@@ -42,6 +43,28 @@ object AuthController {
 
     fun login(ctx: Context) {
         val userInfo = ctx.bodyAsClass(UserInfo::class.java)
+
+        if(AisUserManager.authenticate(userInfo))
+        {
+            println("User ${userInfo.id} authenticated")
+
+            ContextManager.runWith(WalletContextManager.getUserContext(userInfo)) {
+                if(DidService.listDids().isEmpty()) {
+                    DidService.create(DidMethod.key)
+                }
+            }
+
+            ctx.json(UserInfo(userInfo.id).apply {
+                token = JWTService.toJWT(userInfo)
+
+            }   )
+
+            return
+        }
+
+        ctx.status(401).result("Unauthorized")
+
+        /*
         val path = Paths.get("").toAbsolutePath().toString() + "/data/Logins/logins.txt"
         var userDataList = readUserData(path)
         // TODO: verify login credentials!!
@@ -81,8 +104,10 @@ object AuthController {
 //        ctx.json(UserInfo(userInfo.id).apply {
 //            token = JWTService.toJWT(userInfo)
 //        })
-        ctx.status(401).result("Unauthorized")
+        ctx.status(401).result("Unauthorized")*/
     }
+
+    /*
     fun readUserData(path : String) : List<UserData>{
 
         var userDataList = mutableListOf<UserData>()
@@ -114,6 +139,8 @@ object AuthController {
 
         return userDataList.toImmutableList()
     }
+
+     */
     fun userInfo(ctx: Context) {
         println("ctx: ")
         println(ctx.body())

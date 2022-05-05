@@ -7,6 +7,7 @@ package edu.ktu.helpers
 //import org.json.JSONObject
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.json
+import edu.ktu.helpers.ais.backend.AisUserManager
 import id.walt.services.did.DidService
 import id.walt.vclib.credentials.VerifiableId
 import id.walt.webwallet.backend.auth.JWTService
@@ -138,6 +139,7 @@ class StudentCredentialsGenerator {
         @JvmStatic
         fun getStudentDiplomaXml(user : UserInfo) : JSONObject?{
            //val xmlIdPath = "C:\\Users\\jonsei\\Documents\\WalletTamper\\WalletBackEndTamper\\waltid-wallet-backend\\data\\Documents\\diplomas.xml"
+            /*
             val path = Paths.get("").toAbsolutePath().toString() + "/data/Logins/logins.txt"
             var userDataList = readUserData(path)
 
@@ -151,13 +153,18 @@ class StudentCredentialsGenerator {
                     break
                 }
             }
+            */
+
+            var pathToDiploma  = Paths.get("").toAbsolutePath().toString() + "/data/Documents/"
+            val userData = AisUserManager.getUserData(user.email ?: "")
+
+            pathToDiploma += userData?.diplomaName ?: throw Exception("User diploma data not found")
 
 
-
-            println("sadsasadasddsa")
+            //println("sadsasadasddsa")
 //            val path = Paths.get("").toAbsolutePath().toString() + "/data/Documents/" + diplomaFile
             println("path:")
-            println(path)
+            //println(path)
             println("pathtoDiploma:")
             println(pathToDiploma)
             val xmlIdData = File(pathToDiploma).readText(charset = Charsets.UTF_8)

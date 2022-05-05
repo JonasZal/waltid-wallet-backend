@@ -4,6 +4,7 @@ import com.beust.klaxon.Klaxon
 import com.beust.klaxon.KlaxonJson
 import id.walt.WALTID_DATA_ROOT
 import id.walt.webwallet.backend.auth.UserData
+import id.walt.webwallet.backend.auth.UserInfo
 import java.io.File
 
 object AisUserManager {
@@ -16,31 +17,37 @@ object AisUserManager {
 
         if (studentDataString.isEmpty()) return null
 
-        val studentLoginList = Klaxon().parse<List<UserData>>(studentDataString)
+        val studentLoginList = Klaxon().parseArray<UserData>(studentDataString)
         return studentLoginList?.firstOrNull { it.email == userEmail }
+    }
+
+    fun authenticate(userData: UserInfo) : Boolean
+    {
+        val storedUser = getUserData(userData.email ?: return false) ?: return false
+        if(userData.password == storedUser.password) return true
+
+        return false
     }
 
     fun addUserData(user: UserData)
     {
-        var studentLoginList: List<UserData>?
+        var studentLoginList: MutableList<UserData> = mutableListOf()
 
         if (File(studentLoginFile).exists() ){
             val studentDataString: String = File(studentLoginFile).readText(Charsets.UTF_8)
 
-            try
-            {
-                studentLoginList = Klaxon().parseArray(studentDataString)
+            if(studentDataString.isNotEmpty())
+                studentLoginList = Klaxon().parseArray<UserData>(studentDataString)?.toMutableList() ?: mutableListOf()
 
-            } catch (e: Exception)
-            {
-                val login  = Klaxon().parse<UserData>(studentDataString) ?: throw Exception("Unable to read login data file")
-                studentLoginList = listOf(login)
-            }
+            var userIdx = studentLoginList.indexOfFirst { u -> u.email == user.email }
 
-            studentLoginList = studentLoginList?.plus(user)
+            if(userIdx < 0)
+                studentLoginList.add(user)
+            else
+                studentLoginList[userIdx].password = user.password
         }
         else{
-            studentLoginList = listOf(user)
+            studentLoginList = mutableListOf(user)
         }
 
         File(studentLoginFile).writeText(Klaxon().toJsonString(studentLoginList), Charsets.UTF_8)
