@@ -30,6 +30,8 @@ object AisController {
                         }
                             .formParam<String>("userId")
                             .formParam<String>("userPassword")
+                            .formParam<String>("userName")
+                            .formParam<String>("userFamilyName")
                             .result<String>("200"),
                         AisController::requestOnboard
                     ))
@@ -44,11 +46,11 @@ object AisController {
     fun requestOnboard(ctx: Context) {
         val userId = ctx.formParam("userId") ?: throw BadRequestResponse("No user id specified")
         val userPassword = ctx.formParam("userPassword") ?: throw BadRequestResponse("No user password specified")
-
-        //TODO: create new user
+        val userName = ctx.formParam("userName") ?: throw BadRequestResponse("No user name specified")
+        val userFamilyName = ctx.formParam("userFamilyName") ?: throw BadRequestResponse("No user family name specified")
 
         ctx.result(
-            "[ ${AisManager.createNewUser(userId, userPassword) } ]"
+            "[ ${AisManager.createNewUser(userId, userPassword, userName, userFamilyName) } ]"
         )
     }
 

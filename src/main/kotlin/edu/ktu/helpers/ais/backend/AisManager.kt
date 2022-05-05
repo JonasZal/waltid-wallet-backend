@@ -16,10 +16,10 @@ object AisManager {
         return listOf<KtuModule>().plus(aKtuModule)
     }
 
-    fun createNewUser(userId : String, userPassword : String): String {
+    fun createNewUser(userId : String, userPassword : String, userName : String, userFamilyName : String): String {
 
         return try {
-            AisUserManager.addUserData( UserData(userId, userPassword, "") )
+            AisUserManager.addUserData( UserData(userId, userPassword, "ktudiplomas.xml", userName, userFamilyName) )
             "User created"
         } catch (e: Exception) {
             "Can't create user. Error: " + e.message

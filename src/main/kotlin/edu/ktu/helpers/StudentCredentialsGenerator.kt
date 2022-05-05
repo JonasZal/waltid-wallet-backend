@@ -1,27 +1,14 @@
 package edu.ktu.helpers
 
-
-// import java.nio.file.Path
-
-//import org.json.XML
-//import org.json.JSONObject
 import com.beust.klaxon.Klaxon
-import com.beust.klaxon.json
 import edu.ktu.helpers.ais.backend.AisUserManager
 import id.walt.services.did.DidService
 import id.walt.vclib.credentials.VerifiableId
-import id.walt.webwallet.backend.auth.JWTService
-import id.walt.webwallet.backend.auth.UserData
 import id.walt.webwallet.backend.auth.UserInfo
-import okhttp3.internal.toImmutableList
-
 import org.json.JSONException
 import org.json.JSONObject
 import org.json.XML
-import java.io.BufferedReader
 import java.io.File
-import java.io.FileReader
-import java.io.IOException
 import java.nio.file.Paths
 import kotlin.io.path.Path
 
@@ -104,6 +91,7 @@ class StudentCredentialsGenerator {
 //                    DidMethod.key), null, stud.familyName,  stud.firstName, stud.dateOfBirth, stud.personalIdentifier, stud.nameAndFamilyNameAtBirth, stud.placeOfBirth, address, stud.gender)
         }
 
+        /*
         fun readUserData(path : String) : List<UserData>{
 
             var userDataList = mutableListOf<UserData>()
@@ -119,7 +107,7 @@ class StudentCredentialsGenerator {
                         var lines = line!!.split(" ")
                         println("lines:")
                         println(lines)
-                        var user = UserData(lines[0],lines[1],lines[2])
+                        var user = UserData(lines[0],lines[1],lines[2], "", "")
                         println("user:")
                         println(user)
                         userDataList.add(user)
@@ -135,6 +123,7 @@ class StudentCredentialsGenerator {
 
             return userDataList.toImmutableList()
         }
+*/
 
         @JvmStatic
         fun getStudentDiplomaXml(user : UserInfo) : JSONObject?{

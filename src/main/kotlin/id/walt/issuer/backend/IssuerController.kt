@@ -9,6 +9,7 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponse
 import com.nimbusds.openid.connect.sdk.SubjectType
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens
+import edu.ktu.helpers.ais.backend.AisCredentialsManager
 import id.walt.model.dif.CredentialManifest
 import id.walt.model.dif.OutputDescriptor
 import id.walt.model.oidc.CredentialResponse
@@ -163,7 +164,9 @@ object IssuerController {
     val sessionId = ctx.queryParam("sessionId")
     if(sessionId == null)
       //ctx.json(IssuerManager.listIssuableCredentialsFor(userInfo!!.id))
-      ctx.json(IssuerManager.listIssuableCredentialsFor(userInfo))
+
+      //ctx.json(IssuerManager.listIssuableCredentialsFor(userInfo))
+      ctx.json(AisCredentialsManager.listIssuableCredentialsFor(userInfo))
     else
       ctx.json(IssuerManager.getIssuanceSession(sessionId)?.issuables ?: Issuables(credentials = listOf()))
   }
