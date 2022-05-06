@@ -44,8 +44,17 @@ object AisController {
                         AisController::enrolUserToCourse
                     ))
                 }
-                path("onboardStudent"){
-                    post("request", documented(
+                path("student"){
+                    get("getStudentData", documented(
+                        document().operation {
+                            it.summary("Get student information from the KTU AIS")
+                                .addTagsItem("KTU AIS")
+                                .operationId("getStudentData")
+                        }
+                            .result<String>("200"),
+                        AisController::getStudentData
+                    ))
+                    post("onboardRequest", documented(
                         document().operation {
                             it.summary("Onboard new student to the KTU AIS")
                                 .addTagsItem("KTU AIS")
@@ -100,4 +109,14 @@ object AisController {
             "[ ${AisManager.enrolUserToCourse(userInfo, courseId) } ]")
     }
 
+    private fun getStudentData(ctx: Context) {
+        val userInfo = JWTService.getUserInfo(ctx)
+        if(userInfo == null) {
+            ctx.status(HttpCode.UNAUTHORIZED)
+            return
+        }
+
+        ctx.json(
+            AisUserManager.getUserData(userInfo.email!!) ?: throw Exception("User not found"))
+    }
 }
