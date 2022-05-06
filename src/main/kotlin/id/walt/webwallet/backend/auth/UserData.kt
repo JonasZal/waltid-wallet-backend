@@ -5,5 +5,6 @@ class UserData(
     var password: String,
     var diplomaName: String,
     var name: String,
-    var familyName: String
+    var familyName: String,
+    var enrolledCourse: String?
 )

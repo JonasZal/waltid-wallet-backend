@@ -52,4 +52,44 @@ object AisUserManager {
 
         File(studentLoginFile).writeText(Klaxon().toJsonString(studentLoginList), Charsets.UTF_8)
     }
+
+    fun updateUserData(user: UserData)
+    {
+        var studentLoginList: MutableList<UserData> = mutableListOf()
+
+        if (File(studentLoginFile).exists() ){
+            val studentDataString: String = File(studentLoginFile).readText(Charsets.UTF_8)
+
+            if(studentDataString.isNotEmpty())
+                studentLoginList = Klaxon().parseArray<UserData>(studentDataString)?.toMutableList() ?: mutableListOf()
+
+            var userIdx = studentLoginList.indexOfFirst { u -> u.email == user.email }
+
+            if(userIdx < 0)
+                throw Exception("User not found")
+            else {
+                studentLoginList[userIdx].enrolledCourse = user.enrolledCourse
+                studentLoginList[userIdx].diplomaName = user.diplomaName
+            }
+        }
+        else{
+            throw Exception("User data file does not exists")
+        }
+
+        File(studentLoginFile).writeText(Klaxon().toJsonString(studentLoginList), Charsets.UTF_8)
+    }
+
+    fun getEnrolledModules(userInfo: UserInfo): Collection<String>{
+        return listOf(getUserData(userInfo.email!!)!!.enrolledCourse ?: "")
+    }
+
+    fun enrolUserToCourse(userInfo: UserInfo, courseId: String): String {
+        var studentData = getUserData(userInfo.email!!) ?: throw Exception("User not found")
+
+        studentData.enrolledCourse = courseId
+
+        updateUserData(studentData)
+
+        return "User enrolled to {$courseId}"
+    }
 }
