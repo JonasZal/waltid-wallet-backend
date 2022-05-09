@@ -1,5 +1,6 @@
 package id.walt.verifier.backend
 
+import com.beust.klaxon.Klaxon
 import com.google.common.cache.CacheBuilder
 import id.walt.model.dif.InputDescriptor
 import id.walt.model.dif.PresentationDefinition
@@ -120,6 +121,10 @@ abstract class VerifierManager: BaseService() {
   }
 
   open fun getVerificationRedirectionUri(verificationResult: SIOPResponseVerificationResult, uiUrl: String? = VerifierConfig.config.verifierUiUrl): URI {
+    println("Debug dėl SIOPResponseVerificationResult")
+    println(Klaxon().toJsonString(verificationResult))
+    println("Baigtas debug dėl SIOPResponseVerificationResult")
+
     if(verificationResult.isValid == true)
       return URI.create("$uiUrl/success/?access_token=${verificationResult.state}")
     else
