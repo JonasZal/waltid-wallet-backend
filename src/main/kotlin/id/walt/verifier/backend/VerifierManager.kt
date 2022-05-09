@@ -121,9 +121,8 @@ abstract class VerifierManager: BaseService() {
   }
 
   open fun getVerificationRedirectionUri(verificationResult: SIOPResponseVerificationResult, uiUrl: String? = VerifierConfig.config.verifierUiUrl): URI {
-    //println("Debug dėl SIOPResponseVerificationResult")
-    //println(Klaxon().toJsonString(verificationResult))
-    //println("Baigtas debug dėl SIOPResponseVerificationResult")
+    println("Debug dėl SIOPResponseVerificationResult")
+    println(Klaxon().toJsonString(verificationResult))
 
     val req = verificationResult
                   .request
@@ -132,6 +131,11 @@ abstract class VerifierManager: BaseService() {
                   ?.presentation_definition
                   ?.input_descriptors
                   ?.first() {it.schema?.uri == "https://raw.githubusercontent.com/walt-id/waltid-ssikit-vclib/master/src/test/resources/schemas/Europass.json"} ?: ""
+
+    println("Debug dėl SIOPResponseVerificationResult.request")
+    println(Klaxon().toJsonString(verificationResult.request))
+    println("req: $req")
+    println("Baigtas debug dėl SIOPResponseVerificationResult")
 
     if(req == "https://raw.githubusercontent.com/walt-id/waltid-ssikit-vclib/master/src/test/resources/schemas/Europass.json"){
       if(verificationResult.isValid == true)
