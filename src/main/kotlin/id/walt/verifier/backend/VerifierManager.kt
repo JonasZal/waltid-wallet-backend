@@ -121,14 +121,29 @@ abstract class VerifierManager: BaseService() {
   }
 
   open fun getVerificationRedirectionUri(verificationResult: SIOPResponseVerificationResult, uiUrl: String? = VerifierConfig.config.verifierUiUrl): URI {
-    println("Debug dėl SIOPResponseVerificationResult")
-    println(Klaxon().toJsonString(verificationResult))
-    println("Baigtas debug dėl SIOPResponseVerificationResult")
+    //println("Debug dėl SIOPResponseVerificationResult")
+    //println(Klaxon().toJsonString(verificationResult))
+    //println("Baigtas debug dėl SIOPResponseVerificationResult")
 
-    if(verificationResult.isValid == true)
-      return URI.create("$uiUrl/success/?access_token=${verificationResult.state}")
-    else
-      return URI.create("$uiUrl/error/?access_token=${verificationResult.state ?: ""}")
+    val req = verificationResult
+                  .request
+                  ?.claims
+                  ?.vp_token
+                  ?.presentation_definition
+                  ?.input_descriptors
+                  ?.first() {it.schema?.uri == "https://raw.githubusercontent.com/walt-id/waltid-ssikit-vclib/master/src/test/resources/schemas/Europass.json"} ?: ""
+
+    if(req == "https://raw.githubusercontent.com/walt-id/waltid-ssikit-vclib/master/src/test/resources/schemas/Europass.json"){
+      if(verificationResult.isValid == true)
+        return URI.create("$uiUrl/modules/?result=success&access_token=${verificationResult.state}")
+      else
+        return URI.create("$uiUrl/modules/?result=error&access_token=${verificationResult.state ?: ""}")
+    } else {
+      if (verificationResult.isValid == true)
+        return URI.create("$uiUrl/success/?access_token=${verificationResult.state}")
+      else
+        return URI.create("$uiUrl/error/?access_token=${verificationResult.state ?: ""}")
+    }
   }
 
   fun getVerificationResult(id: String): SIOPResponseVerificationResult? {
