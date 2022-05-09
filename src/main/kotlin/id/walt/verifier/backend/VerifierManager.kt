@@ -130,7 +130,7 @@ abstract class VerifierManager: BaseService() {
                   ?.vp_token
                   ?.presentation_definition
                   ?.input_descriptors
-                  ?.first() {it.schema?.uri == "https://raw.githubusercontent.com/walt-id/waltid-ssikit-vclib/master/src/test/resources/schemas/Europass.json"} ?: ""
+                  ?.firstOrNull()?.schema?.uri ?: ""
 
     println("Debug dėl SIOPResponseVerificationResult.request")
     println(Klaxon().toJsonString(verificationResult.request))
