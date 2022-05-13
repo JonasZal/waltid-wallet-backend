@@ -43,8 +43,10 @@ object AisUserManager {
 
             if(userIdx < 0)
                 studentLoginList.add(user)
-            else
+            else {
                 studentLoginList[userIdx].password = user.password
+                studentLoginList[userIdx].enrolledCourse = ""
+            }
         }
         else{
             studentLoginList = mutableListOf(user)
