@@ -14,6 +14,18 @@ object AisController {
     val routes
         get() =
             path(""){
+                path("issuer") {
+                    get("checkAccreditation", documented(
+                        document().operation {
+                            it.summary("Check issuer accreditation")
+                                .addTagsItem("KTU AIS")
+                                .operationId("checkAccreditation")
+                        }
+                            .queryParam<String>("did")
+                            .result<AccreditationCheckResult>("200"),
+                        AisController::checkIssuerAccreditation
+                    ))
+                }
                 path("modules"){
                     get("list", documented(
                         document().operation {
@@ -70,6 +82,11 @@ object AisController {
 
                 }
             }
+
+    private fun checkIssuerAccreditation(ctx: Context){
+        val issuerDid = ctx.queryParam("did") ?: throw BadRequestResponse("No issuer did specified")
+        ctx.json(AisManager.checkIssuerAccreditation(issuerDid))
+    }
 
     private fun listKtuModules(ctx: Context){
         ctx.json(AisManager.getKtuModulesList())

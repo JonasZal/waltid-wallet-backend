@@ -1,9 +1,55 @@
 package edu.ktu.helpers.ais.backend
 
+import com.beust.klaxon.Klaxon
+import eu.ebsi.TrustedIssuersRegistry.DeqarAttestation
+import eu.ebsi.TrustedIssuersRegistry.Issuer
+import eu.ebsi.TrustedIssuersRegistry.IssuerInformation
+import id.walt.vclib.model.VerifiableCredential
 import id.walt.webwallet.backend.auth.UserData
 import id.walt.webwallet.backend.auth.UserInfo
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.util.*
 
 object AisManager {
+
+    fun checkIssuerAccreditation(did : String) : AccreditationCheckResult{
+        var issuerRegistryClient: OkHttpClient = OkHttpClient();
+        val decoder: Base64.Decoder = Base64.getDecoder()
+        var issuerInfo : IssuerInformation? = null
+        var issuerAttestationInfo : DeqarAttestation? = null
+
+        val request = Request.Builder().url("https://api.preprod.ebsi.eu/trusted-issuers-registry/v2/issuers/$did").build()
+        val response = issuerRegistryClient.newCall(request).execute()
+
+        if(response.code != 200) return AccreditationCheckResult(organizationName = "", isAccredited = false, accreditedBy = "", accreditationInformationLocation = "")
+
+        val issuerRegistryResult = response.body?.string() ?: ""
+
+        val issuerData = Klaxon().parse<Issuer>(issuerRegistryResult)
+
+        issuerData?.attributes?.forEach {
+
+            val attribute = String(decoder.decode(it.body))
+            try{
+                if (attribute.contains("https://www.w3.org/2018/credentials/v1", true)) {
+                    issuerAttestationInfo = Klaxon().parse<DeqarAttestation>(attribute)
+                } else {
+                    issuerInfo = Klaxon().parse<IssuerInformation>(attribute)
+                }
+            } catch(e: Exception) {}
+        }
+
+        val organizationName = issuerInfo?.name ?: ""
+        var accreditedBy = if (issuerAttestationInfo?.issuer.equals("did:ebsi:zk4bhCepWSYp9RhZkRPiwUL")) {
+                "Eqar"
+            } else {
+                issuerAttestationInfo?.issuer ?: ""
+            }
+        var accreditationInformationLocation = issuerAttestationInfo?.id ?: ""
+
+        return AccreditationCheckResult(organizationName = organizationName, isAccredited = true, accreditedBy = accreditedBy, accreditationInformationLocation = accreditationInformationLocation)
+    }
 
     fun getKtuModulesList(): Collection<KtuModule>{
 
