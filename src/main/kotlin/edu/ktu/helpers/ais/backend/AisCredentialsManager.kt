@@ -37,7 +37,11 @@ object AisCredentialsManager {
             firstName = studInfo!!.name,
             personalIdentifier = "KTUSTUD" + studInfo!!.name.uppercase(),
             nameAndFamilyNameAtBirth = studInfo!!.name + " " + studInfo!!.familyName,
-            dateOfBirth = "1990-01-01"
+            dateOfBirth = "",
+            placeOfBirth = "",
+            identifier = listOf(VerifiableId.VerifiableIdSubject.Identifier("http://ktu.edu/student-identification-number", "KTUSTUD" + studInfo!!.name.uppercase())),
+            currentAddress = listOf(""),
+            gender = ""
         )
         return IssuableCredential(
             studId!!.credentialSchema!!.id,
@@ -57,7 +61,7 @@ object AisCredentialsManager {
         var europassDiploma: Europass.EuropassSubject = Europass.EuropassSubject()
 
         europassDiploma.id = generateId("credential")
-        europassDiploma.identifier = Europass.EuropassSubject.Identifier("Student identification number", "KTUSTUD" + studInfo!!.name.uppercase())
+        europassDiploma.identifier = Europass.EuropassSubject.Identifier("http://ktu.edu/student-identification-number", "KTUSTUD" + studInfo!!.name.uppercase())
         europassDiploma.achieved = getAchievements(user, studInfo)
 
         var europass = Europass(
@@ -161,7 +165,7 @@ object AisCredentialsManager {
         return listOf(Europass.EuropassSubject.Achieved.SpecifiedBy(
             id = generateId("learningSpecification"),
             title = title,
-            eCTSCreditPoints = 5,
+            eCTSCreditPoints = 6,
             learningOutcome = listOf(
                 Europass.EuropassSubject.Achieved.SpecifiedBy.LearningOutcome(
                     id = generateId("learningOutcome"),
