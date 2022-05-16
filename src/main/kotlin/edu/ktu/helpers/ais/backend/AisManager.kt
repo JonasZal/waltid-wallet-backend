@@ -13,16 +13,22 @@ import java.util.*
 
 object AisManager {
 
-    fun checkIssuerAccreditation(did : String) : AccreditationCheckResult{
+    fun checkIssuerAccreditation(did : String) : AccreditationCheckResult {
         var issuerRegistryClient: OkHttpClient = OkHttpClient();
         val decoder: Base64.Decoder = Base64.getDecoder()
-        var issuerInfo : IssuerInformation? = null
-        var issuerAttestationInfo : DeqarAttestation? = null
+        var issuerInfo: IssuerInformation? = null
+        var issuerAttestationInfo: DeqarAttestation? = null
 
-        val request = Request.Builder().url("https://api.preprod.ebsi.eu/trusted-issuers-registry/v2/issuers/$did").build()
+        val request =
+            Request.Builder().url("https://api.preprod.ebsi.eu/trusted-issuers-registry/v2/issuers/$did").build()
         val response = issuerRegistryClient.newCall(request).execute()
 
-        if(response.code != 200) return AccreditationCheckResult(organizationName = "", isAccredited = false, accreditedBy = "", accreditationInformationLocation = "")
+        if (response.code != 200) return AccreditationCheckResult(
+            organizationName = "",
+            isAccredited = false,
+            accreditedBy = "",
+            accreditationInformationLocation = ""
+        )
 
         val issuerRegistryResult = response.body?.string() ?: ""
 
@@ -31,24 +37,36 @@ object AisManager {
         issuerData?.attributes?.forEach {
 
             val attribute = String(decoder.decode(it.body))
-            try{
+            try {
                 if (attribute.contains("https://www.w3.org/2018/credentials/v1", true)) {
                     issuerAttestationInfo = Klaxon().parse<DeqarAttestation>(attribute)
                 } else {
                     issuerInfo = Klaxon().parse<IssuerInformation>(attribute)
                 }
-            } catch(e: Exception) {}
+            } catch (e: Exception) {
+            }
         }
 
-        val organizationName = issuerInfo?.name ?: ""
+        val organizationName = if (did.equals("did:ebsi:znjjv6JTecDiNjwzoabvuuk") && issuerInfo?.name.equals("issuer")) {
+            "Tampere university"
+        } else {
+            issuerInfo?.name ?: ""
+        }
+
         var accreditedBy = if (issuerAttestationInfo?.issuer.equals("did:ebsi:zk4bhCepWSYp9RhZkRPiwUL")) {
-                "Eqar"
-            } else {
-                issuerAttestationInfo?.issuer ?: ""
-            }
+            "Eqar"
+        } else {
+            issuerAttestationInfo?.issuer ?: ""
+        }
         var accreditationInformationLocation = issuerAttestationInfo?.id ?: ""
 
-        return AccreditationCheckResult(organizationName = organizationName, isAccredited = true, accreditedBy = accreditedBy, accreditationInformationLocation = accreditationInformationLocation)
+        return AccreditationCheckResult(
+            organizationName = organizationName,
+            isAccredited = true,
+            accreditedBy = accreditedBy,
+            accreditationInformationLocation = accreditationInformationLocation
+        )
+    }
     }
 
     fun getKtuModulesList(): Collection<KtuModule>{
