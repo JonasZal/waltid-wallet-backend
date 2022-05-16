@@ -47,11 +47,12 @@ object AisManager {
             }
         }
 
-        val organizationName = if (did.equals("did:ebsi:znjjv6JTecDiNjwzoabvuuk") && issuerInfo?.name.equals("issuer")) {
-            "Tampere university"
-        } else {
-            issuerInfo?.name ?: ""
-        }
+        val organizationName =
+            if (did.equals("did:ebsi:znjjv6JTecDiNjwzoabvuuk") && issuerInfo?.name.equals("issuer")) {
+                "Tampere university"
+            } else {
+                issuerInfo?.name ?: ""
+            }
 
         var accreditedBy = if (issuerAttestationInfo?.issuer.equals("did:ebsi:zk4bhCepWSYp9RhZkRPiwUL")) {
             "Eqar"
@@ -66,7 +67,6 @@ object AisManager {
             accreditedBy = accreditedBy,
             accreditationInformationLocation = accreditationInformationLocation
         )
-    }
     }
 
     fun getKtuModulesList(): Collection<KtuModule>{
