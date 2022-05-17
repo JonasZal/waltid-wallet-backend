@@ -55,7 +55,7 @@ object AisManager {
             }
 
         var accreditedBy = if (issuerAttestationInfo?.issuer.equals("did:ebsi:zk4bhCepWSYp9RhZkRPiwUL")) {
-            "Eqar"
+            "The European Quality Assurance Register for Higher Education (EQAR)"
         } else {
             issuerAttestationInfo?.issuer ?: ""
         }
